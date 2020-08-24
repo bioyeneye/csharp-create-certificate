@@ -16,7 +16,8 @@ namespace IdentityServerCertificate
     {
         
         static CreateCertificates _cc;
-        public static X509Certificate2 CreateRsaCertificate(string dnsName, int validityPeriodInYears)
+        private static string _fileaName;
+        public static X509Certificate2 CreateRsaCertificate(CreateCertificates _cc, string dnsName, int validityPeriodInYears)
         {
             var basicConstraints = new BasicConstraints
             {
@@ -65,7 +66,7 @@ namespace IdentityServerCertificate
 
             return certificate;
         }
-        private static X509Certificate2 CreateECDsaCertificate(string dnsName, int validityPeriodInYears)
+        public static X509Certificate2 CreateECDsaCertificate(CreateCertificates _cc, string dnsName, int validityPeriodInYears)
         {
             var basicConstraints = new BasicConstraints
             {
@@ -116,14 +117,16 @@ namespace IdentityServerCertificate
 
         public async Task UploadCertificateToAWSS3()
         {
-            IAmazonS3 client = new AmazonS3Client("AKI...access-key...", "+8Bo...secrey-key...", RegionEndpoint.APSoutheast2);  
+            IAmazonS3 client = new AmazonS3Client("AKI...access-key...", "+8Bo...secrey-key...", RegionEndpoint.APSoutheast2);
 
-            FileInfo file = new FileInfo(@"c:\test.txt");  
-            string destPath = "folder/sub-folder/test.txt"; // <-- low-level s3 path uses /
+            var fileName = "cert_rsa512.pfx";
+            FileInfo file = new FileInfo(fileName);  
+            string destPath = $"folder/sub-folder/{fileName}"; // <-- low-level s3 path uses /
+            var bucketName = "my-bucket-name";
             PutObjectRequest request = new PutObjectRequest()  
             {  
                 InputStream = file.OpenRead(),  
-                BucketName = "my-bucket-name",  
+                BucketName = bucketName,  
                 Key = destPath // <-- in S3 key represents a path  
             };  
   
